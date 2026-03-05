@@ -1,0 +1,23 @@
+doc.git
+.github
+node_modules
+vendor
+storage/*.key
+.env
+.phpunit.result.cache
+docker-compose.yml
+docker-compose.override.yml
+public/hot
+public/storage
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+storage/logs/*
+# tests/ # Let's keep tests in context if we want to run them in CI later
+
+# Ensure these ARE NOT ignored so the build works:
+# docker/
+# composer.lock
+# package-lock.json
+# public/build

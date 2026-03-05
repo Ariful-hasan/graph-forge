@@ -1,0 +1,87 @@
+services:
+    # 1. Nginx Web Server
+    web:
+        image: nginx:alpine
+        container_name: graph-forge-web
+        restart: unless-stopped
+        ports:
+            - "${APP_PORT:-8000}:80"
+        depends_on:
+            app:
+                condition: service_healthy
+        environment:
+            - PHP_FPM_NGINX_MAX_REQUESTS=${PHP_FPM_NGINX_MAX_REQUESTS:-1000}
+            - PHP_FPM_PORT=${PHP_FPM_PORT:-9000}
+        volumes:
+            - .:/var/www/html
+            - ./docker/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+        networks:
+            - graph-forge
+
+    # 2. PHP-FPM Application
+    app:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+            args:
+                - USER_ID=${USER_ID:-1000}
+                - GROUP_ID=${GROUP_ID:-1000}
+        image: graph-forge-app:latest
+        container_name: graph-forge-app
+        restart: unless-stopped
+        depends_on:
+            db:
+                condition: service_healthy
+        volumes:
+            - .:/var/www/html
+        networks:
+            - graph-forge
+        environment:
+            APP_ENV: ${APP_ENV:-local}
+            APP_DEBUG: ${APP_DEBUG:-true}
+            DB_CONNECTION: mysql
+            DB_HOST: db
+            DB_PORT: 3306
+            DB_DATABASE: ${DB_DATABASE:-graph_forge}
+            DB_USERNAME: ${DB_USERNAME:-sail}
+            DB_PASSWORD: ${DB_PASSWORD:-password}
+            CACHE_STORE: database
+            # REDIS_HOST: redis
+            # REDIS_PORT: 6379
+            # REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
+            QUEUE_CONNECTION: database
+            PHP_FPM_PORT: ${PHP_FPM_PORT:-9000}
+            PHP_FPM_NGINX_MAX_REQUESTS: ${PHP_FPM_NGINX_MAX_REQUESTS:-1000}
+        healthcheck:
+            test: ["CMD", "cgi-fcgi", "-bind", "-connect", "127.0.0.1:${PHP_FPM_PORT:-9000}"]
+            interval: 5s
+            timeout: 3s
+            retries: 5
+            start_period: 30s
+
+    # 3. MySQL Database
+    db:
+        image: 'mysql:8.0'
+        container_name: graph-forge-db
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD:-password}'
+            MYSQL_DATABASE: '${DB_DATABASE:-graph_forge}'
+        volumes:
+            - 'graph-forge-mysql:/var/lib/mysql'
+        networks:
+            - graph-forge
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD:-password}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+
+networks:
+    graph-forge:
+        driver: bridge
+
+volumes:
+    graph-forge-mysql:
+        driver: local
