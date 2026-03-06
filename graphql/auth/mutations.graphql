@@ -1,0 +1,22 @@
+type Mutation {
+    login(
+        email: String!
+        password: String!
+    ): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\Auth\\Login")
+
+    logout: LogoutResponse! @field(resolver: "App\\GraphQL\\Mutations\\Auth\\Logout") @guard
+
+    # register(
+    #     name: String!
+    #     email: String!
+    #     password: String!
+    #     password_confirmation: String!
+    # ): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\Auth\\Register")
+
+    register(
+        name: String! @rules(apply: ["required", "min:3"])
+        email: String! @rules(apply: ["required", "email", "unique:users"])
+        password: String! @rules(apply: ["required", "min:6", "confirmed"])
+        password_confirmation: String! @rules(apply: ["required", "min:6"])
+    ): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\Auth\\Register")
+}

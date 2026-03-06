@@ -1,0 +1,5 @@
+#import scalars/*.graphql
+
+#import auth/*.graphql
+#import user/*.graphql
+#import post/*.graphql
