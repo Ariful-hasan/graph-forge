@@ -1,0 +1,22 @@
+extend type Mutation {
+    createPost(
+        title: String! @rules(apply: ["required", "min:3"])
+        # slug: String! @rules(apply: ["required", "unique:posts"])
+        body: String! @rules(apply: ["required"])
+        status: PostStatus @rules(apply: ["in:draft,published"])
+        published_at: DateTime
+    ): Post! @field(resolver: "App\\GraphQL\\Mutations\\Post\\CreatePost") @guard
+
+    updatePost(
+        id: ID!
+        title: String @rules(apply: ["min:3"])
+        # slug: String @rules(apply: ["unique:posts"])
+        body: String
+        status: PostStatus
+        published_at: DateTime
+    ): Post! @field(resolver: "App\\GraphQL\\Mutations\\Post\\UpdatePost") @guard
+
+    deletePost(
+        id: ID!
+    ): Post @field(resolver: "App\\GraphQL\\Mutations\\Post\\DeletePost") @guard
+}

@@ -1,0 +1,12 @@
+extend type Query {
+    # posts: [Post!]! @all @guard
+    posts(
+        orderBy: _ @orderBy(columns: ["created_at", "title", "status"])
+    ): [Post!]! @paginate(defaultCount: 10) @guard
+
+    post(id: ID! @eq): Post @find @guard
+
+    myPosts(
+        orderBy: _ @orderBy(columns: ["created_at", "title", "status"])
+    ): [Post!]! @paginate(defaultCount: 10, scopes: ["forAuthUser"]) @guard
+}

@@ -1,0 +1,16 @@
+type Post {
+    id: ID!
+    slug: String!
+    title: String!
+    body: String!
+    status: PostStatus!
+    published_at: DateTime
+    created_at: DateTime!
+    updated_at: DateTime!
+    user: User! @belongsTo @with(relation: "user")
+}
+
+enum PostStatus {
+    draft
+    published
+}
