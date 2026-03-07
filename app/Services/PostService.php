@@ -22,12 +22,7 @@ class PostService
     {
         $post = $this->postRepository->findOrFail($args['id']);
 
-        // only owner can update
-        if ($post->user_id !== Auth::id()) {
-            throw ValidationException::withMessages([
-                'id' => ['You are not authorized to update this post.'],
-            ]);
-        }
+        Auth::user()->can('update', $post) || abort(403, 'Unauthorized');
 
         return $this->postRepository->update($post, $args);
     }
@@ -36,12 +31,7 @@ class PostService
     {
         $post = $this->postRepository->findOrFail($args['id']);
 
-        // only owner can delete
-        if ($post->user_id !== Auth::id()) {
-            throw ValidationException::withMessages([
-                'id' => ['You are not authorized to delete this post.'],
-            ]);
-        }
+        Auth::user()->can('delete', $post) || abort(403, 'Unauthorized.');
 
         return $this->postRepository->delete($post);
     }
